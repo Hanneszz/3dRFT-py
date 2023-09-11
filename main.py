@@ -18,4 +18,5 @@ FRICTION_MATERIAL_DEG = 20
 FRICTION_MATERIAL = math.tan(math.radians(FRICTION_MATERIAL_DEG))
 FRICTION_SURFACE = 0.4
 
+print("This is a test line for Git")
 print("The Value for the interface friction coefficient is: ", FRICTION_SURFACE)
