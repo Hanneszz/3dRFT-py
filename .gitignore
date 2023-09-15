@@ -2,4 +2,3 @@
 .gitattributes
 venv
 .DS_Store
-"venv/" 
