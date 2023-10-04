@@ -42,8 +42,7 @@ def import_mesh(model: str):
             object_width_x,
             object_width_y,
             object_height,
-            vertices,
-            faces,
+            trg,
         )
     except FileNotFoundError as exc:
         print(exc)
