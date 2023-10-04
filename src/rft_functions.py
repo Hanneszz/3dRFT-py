@@ -31,6 +31,9 @@ def import_mesh(model: str):
         point_list[:, 2] -= min(point_list[:, 2])
         depth_list = point_list[:, 2]
 
+        vertices = trg.vectors.reshape(-1, 3)
+        faces = trg.v0
+
         return (
             point_list,
             normal_list,
@@ -39,6 +42,8 @@ def import_mesh(model: str):
             object_width_x,
             object_width_y,
             object_height,
+            vertices,
+            faces,
         )
     except FileNotFoundError as exc:
         print(exc)

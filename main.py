@@ -67,6 +67,8 @@ SAVE_FIGURES = 0
     object_width_x,
     object_width_y,
     object_height,
+    vertices,
+    faces,
 ) = rft_functions.import_mesh(MODEL)
 
 result_matrix = np.zeros((NUM_STEPS, 7))
