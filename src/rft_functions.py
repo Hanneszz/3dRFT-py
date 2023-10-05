@@ -32,7 +32,8 @@ def import_mesh(model: str):
         depth_list = point_list[:, 2]
 
         vertices = trg.vectors.reshape(-1, 3)
-        faces = trg.v0
+        vertices, indices = np.unique(vertices, axis=0, return_inverse=True)
+        faces = indices.reshape(-1, 3)
 
         return (
             point_list,
@@ -118,8 +119,6 @@ def check_conditions(point_list, normal_list, area_list, depth_list, movement):
     depth_list = depth_list[include]
     movement = movement[include, :]
 
-    print("rtest")
-
     return point_list, normal_list, area_list, depth_list, movement
 
 
@@ -165,8 +164,8 @@ def find_angles(
     gamma = np.zeros(normal_list.shape[0])
     psi = np.zeros(normal_list.shape[0])
 
-    dot_normals_r = np.sum(normal_list * r_local, axis=1, keepdims=True)
-    dot_normals_z = np.sum(normal_list * z_local, axis=1, keepdims=True)
+    dot_normals_r = np.sum(normal_list * r_local, axis=1)
+    dot_normals_z = np.sum(normal_list * z_local, axis=1)
 
     mask_1 = np.squeeze((dot_normals_r >= 0) & (dot_normals_z >= 0))
     mask_2 = np.squeeze((dot_normals_r >= 0) & (dot_normals_z < 0))
