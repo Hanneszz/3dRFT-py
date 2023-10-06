@@ -15,7 +15,7 @@ from src import rft_functions
 MODEL = "CylinderNormal"
 
 ## Physical properties
-BULK_DENSITY = 1520
+BULK_DENSITY = 1310
 FRICTION_MATERIAL_DEG = 20
 FRICTION_MATERIAL = math.tan(np.deg2rad(FRICTION_MATERIAL_DEG))
 FRICTION_SURFACE = 0.4

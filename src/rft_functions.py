@@ -178,24 +178,24 @@ def find_angles(
         -np.pi + np.arccos(dot_normals_z[~(mask_1 | mask_2 | mask_3)]), 12
     )
 
-    dot_movement_r = np.sum(movement * r_local, axis=1, keepdims=True)
-    dot_movement_z = np.sum(movement * z_local, axis=1, keepdims=True)
+    dot_movement_r = np.sum(movement * r_local, axis=1)
+    dot_movement_z = np.sum(movement * z_local, axis=1)
 
     gamma[:] = np.round(np.arccos(np.clip(dot_movement_r, -1, 1)), 12)
     gamma[dot_movement_z > 0] *= -1
 
-    diff_normals = normal_list - dot_normals_z * z_local
-    norm_diff_normals = np.linalg.norm(diff_normals, axis=1, keepdims=True)
+    diff_normals = normal_list - dot_normals_z[:, np.newaxis] * z_local
+    norm_diff_normals = np.linalg.norm(diff_normals, axis=1)
 
     nr0_inc = np.where(
-        norm_diff_normals != 0,
-        diff_normals / norm_diff_normals,
-        0,
+        norm_diff_normals[:, np.newaxis] != 0,
+        diff_normals / norm_diff_normals[:, np.newaxis],
+        np.zeros_like(diff_normals),
     )
-    dot_nr0_r = np.sum(nr0_inc * r_local, axis=1, keepdims=True)
-    dot_nr0_theta = np.sum(nr0_inc * theta_local, axis=1, keepdims=True)
+    dot_nr0_r = np.sum(nr0_inc * r_local, axis=1)
+    dot_nr0_theta = np.sum(nr0_inc * theta_local, axis=1)
 
-    mask_psi = norm_diff_normals == 0 | (dot_nr0_r == 0)
+    mask_psi = np.squeeze((norm_diff_normals == 0) | (dot_nr0_r == 0))
     psi[~mask_psi] = np.round(
         np.arctan(dot_nr0_theta[~mask_psi] / dot_nr0_r[~mask_psi]), 12
     )
@@ -339,7 +339,11 @@ def find_alpha(
     alpha_z_gen = np.round(-f_1 * np.cos(beta) - f_2 * np.sin(gamma) - f_3, 12)
 
     alpha_generic = np.column_stack(
-        (alpha_r_gen * r_local, alpha_theta_gen * theta_local, alpha_z_gen * z_local)
+        (
+            alpha_r_gen[:, np.newaxis] * r_local,
+            alpha_theta_gen[:, np.newaxis] * theta_local,
+            alpha_z_gen[:, np.newaxis] * z_local,
+        )
     )
 
     dot_product_alpha_normals = np.einsum("ij,ij->i", alpha_generic, -normal_list)
