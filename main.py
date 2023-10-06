@@ -47,14 +47,6 @@ NUM_STEPS = int((END_DEPTH - START_DEPTH) / STEP_SIZE)
 
 ## Miscellaneous & Plots
 THRESHOLD = 1.0e-12
-SHOW_GEOMETRY = 0
-SHOW_MOVEMENT = 0
-SHOW_ALPHA = 0
-SHOW_QUIVER = 0
-SHOW_SCATTER = 1
-SHOW_SCATTER_XYZ = 0
-SHOW_RESULTS = 0
-SAVE_FIGURES = 0
 
 ######## METHOD ########
 
@@ -76,7 +68,7 @@ result_matrix = np.zeros((NUM_STEPS, 7))
 STEP = 0
 
 ## Start loop
-for depth in range(START_DEPTH, END_DEPTH + STEP_SIZE, STEP_SIZE):
+for depth in range(START_DEPTH, END_DEPTH, STEP_SIZE):
     point_list[:, 2] -= depth
     ## Calculate movement
     movement = rft_functions.calc_movement(

@@ -338,12 +338,10 @@ def find_alpha(
     alpha_theta_gen = np.round(f_1 * np.sin(beta) * np.sin(psi), 12)
     alpha_z_gen = np.round(-f_1 * np.cos(beta) - f_2 * np.sin(gamma) - f_3, 12)
 
-    alpha_generic = np.column_stack(
-        (
-            alpha_r_gen[:, np.newaxis] * r_local,
-            alpha_theta_gen[:, np.newaxis] * theta_local,
-            alpha_z_gen[:, np.newaxis] * z_local,
-        )
+    alpha_generic = (
+        alpha_r_gen[:, np.newaxis] * r_local
+        + alpha_theta_gen[:, np.newaxis] * theta_local
+        + alpha_z_gen[:, np.newaxis] * z_local
     )
 
     dot_product_alpha_normals = np.einsum("ij,ij->i", alpha_generic, -normal_list)
@@ -353,12 +351,12 @@ def find_alpha(
     alpha_generic_n = np.zeros(normal_list.shape)
     alpha_generic_t = np.zeros(normal_list.shape)
 
-    alpha_generic_n[mask_1] = (-dot_product_alpha_normals[mask_1]) * (
+    alpha_generic_n[mask_1] = (-dot_product_alpha_normals[mask_1][:, np.newaxis]) * (
         -normal_list[mask_1]
     )
     alpha_generic_t[mask_1] = alpha_generic[mask_1] + alpha_generic_n[mask_1]
 
-    alpha_generic_n[mask_2] = (dot_product_alpha_normals[mask_2]) * (
+    alpha_generic_n[mask_2] = (dot_product_alpha_normals[mask_2][:, np.newaxis]) * (
         -normal_list[mask_2]
     )
     alpha_generic_t[mask_2] = alpha_generic[mask_2] - alpha_generic_n[mask_2]
@@ -374,7 +372,7 @@ def find_alpha(
             * np.linalg.norm(alpha_generic_n, axis=1, keepdims=True)
             / np.linalg.norm(alpha_generic_t, axis=1, keepdims=True),
             1,
-        )
+        )[:, np.newaxis]
         * alpha_generic_t
     )
 
@@ -383,7 +381,7 @@ def find_alpha(
 
 def find_forces(alpha, depth_list, area_list):
     """This determines the forces on the object"""
-    forces = alpha * abs(depth_list) * area_list
+    forces = alpha * abs(depth_list)[:, np.newaxis] * area_list[:, np.newaxis]
     pressure = forces / area_list / 1000000
 
     force_x = np.sum(forces[:, 0])
