@@ -16,9 +16,16 @@ MODEL = "CylinderNormal"
 
 ## Physical properties
 BULK_DENSITY = 1310
-FRICTION_MATERIAL_DEG = 20
-FRICTION_MATERIAL = math.tan(np.deg2rad(FRICTION_MATERIAL_DEG))
+FRICTION_MATERIAL = 0.21
 FRICTION_SURFACE = 0.4
+FRICTION_TYPE = "coefficient"
+if FRICTION_TYPE == "angle":
+    FRICTION_MATERIAL = math.tan(np.deg2rad(FRICTION_MATERIAL))
+    FRICTION_SURFACE = math.tan(np.deg2rad(FRICTION_SURFACE))
+elif FRICTION_TYPE == "coefficient":
+    pass
+else:
+    raise ValueError("FRICTION_UNIT must be either 'angle' or 'coefficient'")
 GRAVITY = 9.81
 MATERIAL_CONSTANT = (
     GRAVITY
@@ -42,7 +49,7 @@ ANGULAR_VELOCITY = np.array([0, 0, -2 * sp.pi])
 START_DEPTH = 100
 END_DEPTH = 125
 STEP_SIZE = 5
-NUM_STEPS = int((END_DEPTH - START_DEPTH) / STEP_SIZE)
+NUM_STEPS = int((END_DEPTH + STEP_SIZE - START_DEPTH) / STEP_SIZE)
 
 
 ## Miscellaneous & Plots
@@ -68,7 +75,7 @@ result_matrix = np.zeros((NUM_STEPS, 7))
 STEP = 0
 
 ## Start loop
-for depth in range(START_DEPTH, END_DEPTH, STEP_SIZE):
+for depth in range(START_DEPTH, END_DEPTH + STEP_SIZE, STEP_SIZE):
     point_list[:, 2] -= depth
     ## Calculate movement
     movement = rft_functions.calc_movement(
@@ -147,4 +154,5 @@ for depth in range(START_DEPTH, END_DEPTH, STEP_SIZE):
         torque_z,
     ]
 
+    print("Processed movement at depth:", depth, "mm")
     STEP += 1
