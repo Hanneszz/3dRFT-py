@@ -77,6 +77,7 @@ STEP = 0
 ## Start loop
 for depth in range(START_DEPTH, END_DEPTH + STEP_SIZE, STEP_SIZE):
     point_list[:, 2] -= depth
+    vertices[:, 2] -= depth
     ## Calculate movement
     movement = rft_functions.calc_movement(
         point_list,
