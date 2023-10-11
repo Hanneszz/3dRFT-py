@@ -141,27 +141,21 @@ def find_local_frame(normal_list, movement):
     difference_normal = normal_list - dot_product_normal * z_local
     norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True).round(12)
 
-    temp_mask_1 = norms_movement == 0
-    temp_mask_2 = norms_normal == 0
+    r_local_1 = np.where((norms_movement == 0) & (norms_normal == 0), [1, 0, 0], 0)
+    r_local_2 = np.where(
+        (norms_movement == 0) & ~(norms_normal == 0),
+        difference_normal / norms_normal,
+        0,
+    )
+    r_local_3 = np.where(
+        ~((norms_movement == 0) | (norms_normal == 0)),
+        difference_movement / norms_movement,
+        0,
+    )
 
-    mask_1 = np.squeeze(temp_mask_1 & temp_mask_2)
-    mask_2 = np.squeeze(temp_mask_1 & ~temp_mask_2)
-    mask_3 = np.squeeze(~mask_1 & ~mask_2)
+    r_local = r_local_1 + r_local_2 + r_local_3
 
-    r_local[mask_1] = [1, 0, 0]
-    r_local[mask_2] = difference_normal[mask_2] / norms_normal[mask_2]
-    # check r_local
-    print(r_local)
-    print("###### initial state #####")
-    # apply operation for mask_3 --> mask_3[:] = True
-    r_local[mask_3] = difference_movement[mask_3] / norms_movement[mask_3]
-    print(r_local)
-    print("##### after trying with mask ######")
-    # since r_local = 0 0 0, 0 0 0..., try operation without mask
-    r_local = difference_movement / norms_movement
-    print(r_local)
-    print("##### without mask ######")
-    # why it work now and not before man :(
+    r_local = np.sum([r_local_1, r_local_2, r_local_3], axis=0)
 
     theta_local = np.cross(z_local, r_local, axis=1)
 
@@ -180,41 +174,39 @@ def find_angles(
     gamma = np.zeros(normal_list.shape[0])
     psi = np.zeros(normal_list.shape[0])
 
-    dot_normals_r = np.sum(normal_list * r_local, axis=1)
-    dot_normals_z = np.sum(normal_list * z_local, axis=1)
+    dot_normals_r = np.einsum("ij,ij->i", normal_list, r_local)[:, np.newaxis]
+    dot_normals_z = np.einsum("ij,ij->i", normal_list, z_local)[:, np.newaxis]
 
-    mask_1 = np.squeeze((dot_normals_r >= 0) & (dot_normals_z >= 0))
-    mask_2 = np.squeeze((dot_normals_r >= 0) & (dot_normals_z < 0))
-    mask_3 = np.squeeze((dot_normals_r < 0) & (dot_normals_z >= 0))
-
-    beta[mask_1] = -np.round(np.arccos(dot_normals_z[mask_1]), 12)
-    beta[mask_2] = np.round(np.pi - np.arccos(dot_normals_z[mask_2]), 12)
-    beta[mask_3] = np.round(np.arccos(dot_normals_z[mask_3]), 12)
-    beta[~(mask_1 | mask_2 | mask_3)] = np.round(
-        -np.pi + np.arccos(dot_normals_z[~(mask_1 | mask_2 | mask_3)]), 12
+    beta_1 = np.where(
+        (dot_normals_r >= 0) & (dot_normals_z >= 0), -np.arccos(dot_normals_z), 0
     )
+    beta_2 = np.where(
+        (dot_normals_r >= 0) & (dot_normals_z < 0), np.pi - np.arccos(dot_normals_z), 0
+    )
+    beta_3 = np.where(
+        (dot_normals_r < 0) & (dot_normals_z >= 0), np.arccos(dot_normals_z), 0
+    )
+    beta_4 = np.where(
+        (dot_normals_r < 0) & (dot_normals_z < 0), -np.pi + np.arccos(dot_normals_z), 0
+    )
+
+    beta = (beta_1 + beta_2 + beta_3 + beta_4).round(12)
 
     dot_movement_r = np.sum(movement * r_local, axis=1)
     dot_movement_z = np.sum(movement * z_local, axis=1)
 
-    gamma[:] = np.round(np.arccos(np.clip(dot_movement_r, -1, 1)), 12)
+    gamma = np.round(np.arccos(np.clip(dot_movement_r, -1, 1)), 12)
     gamma[dot_movement_z > 0] *= -1
 
-    diff_normals = normal_list - dot_normals_z[:, np.newaxis] * z_local
-    norm_diff_normals = np.linalg.norm(diff_normals, axis=1)
+    diff_normals = normal_list - dot_normals_z * z_local
+    norm_diff_normals = np.linalg.norm(diff_normals, axis=1, keepdims=True).round(12)
 
-    nr0_inc = np.where(
-        norm_diff_normals[:, np.newaxis] != 0,
-        diff_normals / norm_diff_normals[:, np.newaxis],
-        np.zeros_like(diff_normals),
-    )
-    dot_nr0_r = np.sum(nr0_inc * r_local, axis=1)
-    dot_nr0_theta = np.sum(nr0_inc * theta_local, axis=1)
+    nr0_inc = (diff_normals / norm_diff_normals).round(12)
+    dot_nr0_r = np.sum(nr0_inc * r_local, axis=1, keepdims=True)
+    dot_nr0_theta = np.sum(nr0_inc * theta_local, axis=1, keepdims=True)
 
-    mask_psi = np.squeeze((norm_diff_normals == 0) | (dot_nr0_r == 0))
-    psi[~mask_psi] = np.round(
-        np.arctan(dot_nr0_theta[~mask_psi] / dot_nr0_r[~mask_psi]), 12
-    )
+    psi = np.round(np.arctan(dot_nr0_theta / dot_nr0_r), 12)
+    psi[(norm_diff_normals == 0) | (dot_nr0_r == 0)] = 0
 
     return beta, gamma, psi
 
