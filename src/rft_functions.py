@@ -26,6 +26,9 @@ def import_mesh(model: str):
 
         point_list = trg.centroids
         normal_list = trg.normals
+        normal_list = (
+            normal_list / np.linalg.norm(normal_list, axis=1, keepdims=True)
+        ).round(12)
         area_list = trg.areas
 
         point_list[:, 2] -= min(point_list[:, 2])
@@ -128,13 +131,15 @@ def find_local_frame(normal_list, movement):
 
     r_local = np.zeros_like(z_local)
 
-    dot_product_movement = np.einsum("ij,ij->ij", movement, z_local)
+    dot_product_movement = np.einsum("ij,ij->i", movement, z_local)[:, np.newaxis]
     difference_movement = movement - dot_product_movement * z_local
-    norms_movement = np.linalg.norm(difference_movement, axis=1, keepdims=True)
+    norms_movement = np.linalg.norm(difference_movement, axis=1, keepdims=True).round(
+        12
+    )
 
-    dot_product_normal = np.einsum("ij,ij->ij", normal_list, z_local)
+    dot_product_normal = np.einsum("ij,ij->i", normal_list, z_local)[:, np.newaxis]
     difference_normal = normal_list - dot_product_normal * z_local
-    norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True)
+    norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True).round(12)
 
     temp_mask_1 = norms_movement == 0
     temp_mask_2 = norms_normal == 0
@@ -145,7 +150,18 @@ def find_local_frame(normal_list, movement):
 
     r_local[mask_1] = [1, 0, 0]
     r_local[mask_2] = difference_normal[mask_2] / norms_normal[mask_2]
+    # check r_local
+    print(r_local)
+    print("###### initial state #####")
+    # apply operation for mask_3 --> mask_3[:] = True
     r_local[mask_3] = difference_movement[mask_3] / norms_movement[mask_3]
+    print(r_local)
+    print("##### after trying with mask ######")
+    # since r_local = 0 0 0, 0 0 0..., try operation without mask
+    r_local = difference_movement / norms_movement
+    print(r_local)
+    print("##### without mask ######")
+    # why it work now and not before man :(
 
     theta_local = np.cross(z_local, r_local, axis=1)
 
