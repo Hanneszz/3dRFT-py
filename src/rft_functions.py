@@ -32,7 +32,7 @@ def import_mesh(model: str):
         area_list = trg.areas
 
         point_list[:, 2] -= min(point_list[:, 2])
-        depth_list = point_list[:, 2]
+        depth_list = point_list[:, 2][:, np.newaxis]
 
         vertices = trg.vectors.reshape(-1, 3)
         vertices, indices = np.unique(vertices, axis=0, return_inverse=True)
@@ -170,9 +170,9 @@ def find_angles(
     theta_local: np.array,
 ) -> (np.array, np.array, np.array):
     """This determines the characteristic angles of the RFT method"""
-    beta = np.zeros(normal_list.shape[0])
-    gamma = np.zeros(normal_list.shape[0])
-    psi = np.zeros(normal_list.shape[0])
+    beta = np.zeros(normal_list.shape[0])[:, np.newaxis]
+    gamma = np.zeros(normal_list.shape[0])[:, np.newaxis]
+    psi = np.zeros(normal_list.shape[0])[:, np.newaxis]
 
     dot_normals_r = np.einsum("ij,ij->i", normal_list, r_local)[:, np.newaxis]
     dot_normals_z = np.einsum("ij,ij->i", normal_list, z_local)[:, np.newaxis]
@@ -192,8 +192,8 @@ def find_angles(
 
     beta = (beta_1 + beta_2 + beta_3 + beta_4).round(12)
 
-    dot_movement_r = np.sum(movement * r_local, axis=1)
-    dot_movement_z = np.sum(movement * z_local, axis=1)
+    dot_movement_r = np.sum(movement * r_local, axis=1, keepdims=True)
+    dot_movement_z = np.sum(movement * z_local, axis=1, keepdims=True)
 
     gamma = np.round(np.arccos(np.clip(dot_movement_r, -1, 1)), 12)
     gamma[dot_movement_z > 0] *= -1
@@ -319,9 +319,9 @@ def find_fit(beta, gamma, psi):
         ]
     )
 
-    f_1 = t_k @ c1k
-    f_2 = t_k @ c2k
-    f_3 = t_k @ c3k
+    f_2 = (t_k @ c2k)[:, np.newaxis]
+    f_3 = (t_k @ c3k)[:, np.newaxis]
+    f_1 = (t_k @ c1k)[:, np.newaxis]
 
     return f_1, f_2, f_3
 
@@ -347,9 +347,7 @@ def find_alpha(
     alpha_z_gen = np.round(-f_1 * np.cos(beta) - f_2 * np.sin(gamma) - f_3, 12)
 
     alpha_generic = (
-        alpha_r_gen[:, np.newaxis] * r_local
-        + alpha_theta_gen[:, np.newaxis] * theta_local
-        + alpha_z_gen[:, np.newaxis] * z_local
+        alpha_r_gen * r_local + alpha_theta_gen * theta_local + alpha_z_gen * z_local
     )
 
     dot_product_alpha_normals = np.einsum("ij,ij->i", alpha_generic, -normal_list)
@@ -373,31 +371,26 @@ def find_alpha(
     mask_3 = dot_product_alpha_t_move < 0
     alpha_generic_t[mask_3] *= -1
 
-    alpha = material_constant * (
-        alpha_generic_n
-        + np.min(
-            friction_surface
-            * np.linalg.norm(alpha_generic_n, axis=1, keepdims=True)
-            / np.linalg.norm(alpha_generic_t, axis=1, keepdims=True),
-            1,
-        )[:, np.newaxis]
-        * alpha_generic_t
-    )
+    norm_alpha_n = np.linalg.norm(alpha_generic_n, axis=1, keepdims=True)
+    norm_alpha_t = np.linalg.norm(alpha_generic_t, axis=1, keepdims=True)
+    ratio = friction_surface * (norm_alpha_n / norm_alpha_t)
+    ratio[ratio > 1 | np.isnan(ratio)] = 1
+    alpha = material_constant * (alpha_generic_n + ratio * alpha_generic_t)
 
     return alpha_generic, alpha_generic_n, alpha_generic_t, alpha
 
 
 def find_forces(alpha, depth_list, area_list):
     """This determines the forces on the object"""
-    forces = alpha * abs(depth_list)[:, np.newaxis] * area_list[:, np.newaxis]
-    pressure = forces / area_list / 1000000
+    forces = alpha * abs(depth_list) * area_list
+    pressures = forces / area_list
 
     force_x = np.sum(forces[:, 0])
     force_y = np.sum(forces[:, 1])
     force_z = np.sum(forces[:, 2])
     resultant = np.linalg.norm([force_x, force_y, force_z])
 
-    return forces, pressure, force_x, force_y, force_z, resultant
+    return forces, pressures, force_x, force_y, force_z, resultant
 
 
 def find_torques(point_list, forces):
