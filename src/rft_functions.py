@@ -394,8 +394,8 @@ def find_forces(alpha, depth_list, area_list):
 
 
 def find_torques(point_list, forces):
-    """This determines the torques on the object"""
-    torques = np.cross(point_list, forces)
+    """This determines the torques on the object in Nm"""
+    torques = np.cross(point_list, forces) / 1000
     torque_x = np.sum(torques[:, 0])
     torque_y = np.sum(torques[:, 1])
     torque_z = np.sum(torques[:, 2])

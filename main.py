@@ -35,7 +35,7 @@ MATERIAL_CONSTANT = (
         - 386 * FRICTION_MATERIAL**2
         + 89 * FRICTION_MATERIAL
     )
-)
+) * 10**-9
 
 ## Movement defintions
 LINEAR_VELOCITY = 0.1
