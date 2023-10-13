@@ -3,6 +3,7 @@ proposed by Agarwal et al. --> https://doi.org/10.1073/pnas.2214017120"""
 
 ######## IMPORTS ########
 import math
+import time
 
 import numpy as np
 import scipy as sp
@@ -47,7 +48,7 @@ ANGULAR_VELOCITY = np.array([0, 0, -2 * sp.pi])
 
 ## Depth parameters in mm
 START_DEPTH = 100
-END_DEPTH = 125
+END_DEPTH = 200
 STEP_SIZE = 5
 NUM_STEPS = int((END_DEPTH + STEP_SIZE - START_DEPTH) / STEP_SIZE)
 
@@ -76,6 +77,8 @@ STEP = 0
 
 ## Start loop
 for depth in range(START_DEPTH, END_DEPTH + STEP_SIZE, STEP_SIZE):
+    time1 = time.time()
+
     point_list[:, 2] -= depth
     vertices[:, 2] -= depth
     ## Calculate movement
@@ -157,3 +160,5 @@ for depth in range(START_DEPTH, END_DEPTH + STEP_SIZE, STEP_SIZE):
 
     print("Processed movement at depth:", depth, "mm")
     STEP += 1
+    time2 = time.time()
+    print("Time taken for depth:", time2 - time1, "seconds")
