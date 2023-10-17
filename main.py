@@ -43,7 +43,7 @@ LINEAR_VELOCITY = 0.1
 DIR_ANGLE_XZ_DEG = -90
 DIR_ANGLE_Y_DEG = -90
 
-ROTATION = True
+ROTATION = False
 ANGULAR_VELOCITY = np.array([0, 0, -2 * sp.pi])
 
 ## Depth parameters in mm
