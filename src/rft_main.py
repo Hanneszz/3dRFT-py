@@ -432,7 +432,7 @@ def run_rft(
         vertices,
         faces,
         trg,
-    ) = rft_functions.import_mesh(model)
+    ) = import_mesh(model)
 
     result_matrix = np.zeros((num_steps, 7))
     step = 0
@@ -442,7 +442,7 @@ def run_rft(
         vertices[:, 2] -= depth
 
         ## Calculate movement
-    movement = rft_functions.calc_movement(
+    movement = calc_movement(
         point_list,
         depth,
         object_height,
@@ -460,25 +460,19 @@ def run_rft(
         area_list,
         depth_list,
         movement,
-    ) = rft_functions.check_conditions(
-        point_list, normal_list, area_list, depth_list, movement
-    )
+    ) = check_conditions(point_list, normal_list, area_list, depth_list, movement)
 
     ## Find local coordinate frame for each subsurface
-    z_local, r_local, theta_local = rft_functions.find_local_frame(
-        normal_list, movement
-    )
+    z_local, r_local, theta_local = find_local_frame(normal_list, movement)
 
     ## Find the characteristic angles of the RFT method
-    beta, gamma, psi = rft_functions.find_angles(
-        normal_list, movement, z_local, r_local, theta_local
-    )
+    beta, gamma, psi = find_angles(normal_list, movement, z_local, r_local, theta_local)
 
     ## Find empirical values for the RFT method
-    f_1, f_2, f_3 = rft_functions.find_fit(beta, gamma, psi)
+    f_1, f_2, f_3 = find_fit(beta, gamma, psi)
 
     ## Find dimensionless response vectors alpha
-    alpha_generic, alpha_generic_n, alpha_generic_t, alpha = rft_functions.find_alpha(
+    alpha_generic, alpha_generic_n, alpha_generic_t, alpha = find_alpha(
         normal_list,
         movement,
         beta,
@@ -495,7 +489,7 @@ def run_rft(
     )
 
     ## Find the resultant forces on object
-    forces, pressures, force_x, force_y, force_z, resultant = rft_functions.find_forces(
+    forces, pressures, force_x, force_y, force_z, resultant = find_forces(
         alpha, depth_list, area_list
     )
 
@@ -506,7 +500,7 @@ def run_rft(
         torque_y,
         torque_z,
         resultant_torque,
-    ) = rft_functions.find_torques(point_list, forces)
+    ) = find_torques(point_list, forces)
 
     result_matrix[step, :] = [
         depth,
