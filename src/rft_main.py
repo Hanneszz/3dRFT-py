@@ -22,7 +22,6 @@ def run_rft(
     start_depth,
     end_depth,
     step_size,
-    threshold,
 ):
     """This is the Python implementation of the 3D-RFT Code based on the framework"""
     if friction_type == "angle":
