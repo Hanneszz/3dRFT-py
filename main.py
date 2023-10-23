@@ -2,7 +2,6 @@
 proposed by Agarwal et al. --> https://doi.org/10.1073/pnas.2214017120"""
 
 ######## IMPORTS ########
-import math
 import time
 
 import numpy as np
@@ -21,8 +20,8 @@ FRICTION_MATERIAL = 0.21
 FRICTION_SURFACE = 0.4
 FRICTION_TYPE = "coefficient"
 if FRICTION_TYPE == "angle":
-    FRICTION_MATERIAL = math.tan(np.deg2rad(FRICTION_MATERIAL))
-    FRICTION_SURFACE = math.tan(np.deg2rad(FRICTION_SURFACE))
+    FRICTION_MATERIAL = np.tan(np.deg2rad(FRICTION_MATERIAL))
+    FRICTION_SURFACE = np.tan(np.deg2rad(FRICTION_SURFACE))
 elif FRICTION_TYPE == "coefficient":
     pass
 else:
