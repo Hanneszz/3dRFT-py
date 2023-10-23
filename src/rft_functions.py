@@ -8,15 +8,7 @@ from stl import mesh
 
 
 def import_mesh(model: str):
-    """Calculates the geometric properties of a 3D object from an STL file.
-
-    Args:
-        model (str): The path to the STL file.
-
-    Returns:
-        tuple: A tuple of the geometric properties of the object,
-        including the point cloud, normals, areas, depths, width, height, and length.
-    """
+    """This imports the mesh from the models folder"""
     try:
         trg = mesh.Mesh.from_file(f"./models/{model}.stl")
         mins = np.amin(trg.centroids, axis=0)
@@ -66,22 +58,7 @@ def calc_movement(
     rotation,
     angular_velocity,
 ):
-    """Calculates the movement of a set of points based on various input parameters.
-
-    Args:
-        points (np.ndarray): The set of points to move.
-        depth (float): The depth of the object.
-        object_height (float): The height of the object.
-        dir_angle_xz_deg (float): The direction angle in the XZ plane in degrees.
-        dir_angle_y_deg (float): The direction angle in the Y direction in degrees.
-        linear_velocity (float): The linear velocity.
-        rotation (bool): Whether or not the object is rotating.
-        angular_velocity (float): The angular velocity.
-
-    Returns:
-        np.ndarray: The set of points after movement.
-    """
-
+    """This calculates the movement of the object"""
     if not isinstance(rotation, bool):
         raise TypeError("rotation must be a boolean value.")
 

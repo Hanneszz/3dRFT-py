@@ -13,7 +13,7 @@ from src import rft_functions
 ######## INPUTS ########
 
 ## Model selection
-MODEL = "CylinderNormal"
+MODEL = "CylinderRough"
 
 ## Physical properties
 BULK_DENSITY = 1310
