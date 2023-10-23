@@ -3,7 +3,7 @@
 ######## IMPORTS ########
 import numpy as np
 
-from src import rft_functions
+import rft_functions
 
 
 def run_rft(
@@ -146,36 +146,38 @@ def run_rft(
     print("Processed movement at depth:", depth, "mm")
     step += 1
 
-    return (
-        point_list,
-        normal_list,
-        area_list,
-        depth_list,
-        object_width_x,
-        object_width_y,
-        object_height,
-        vertices,
-        faces,
-        trg,
-        movement,
-        z_local,
-        r_local,
-        theta_local,
-        alpha_generic,
-        alpha_generic_n,
-        alpha_generic_t,
-        alpha,
-        depth,
-        forces,
-        pressures,
-        force_x,
-        force_y,
-        force_z,
-        resultant,
-        torques,
-        torque_x,
-        torque_y,
-        torque_z,
-        resultant_torque,
-        result_matrix,
-    )
+    results = {
+        "point_list": point_list,
+        "normal_list": normal_list,
+        "area_list": area_list,
+        "depth_list": depth_list,
+        "object_width_x": object_width_x,
+        "object_width_y": object_width_y,
+        "object_height": object_height,
+        "vertices": vertices,
+        "faces": faces,
+        "trg": trg,
+        "movement": movement,
+        "z_local": z_local,
+        "r_local": r_local,
+        "theta_local": theta_local,
+        "alpha_generic": alpha_generic,
+        "alpha_generic_n": alpha_generic_n,
+        "alpha_generic_t": alpha_generic_t,
+        "alpha": alpha,
+        "depth": depth,
+        "forces": forces,
+        "pressures": pressures,
+        "force_x": force_x,
+        "force_y": force_y,
+        "force_z": force_z,
+        "resultant": resultant,
+        "torques": torques,
+        "torque_x": torque_x,
+        "torque_y": torque_y,
+        "torque_z": torque_z,
+        "resultant_torque": resultant_torque,
+        "result_matrix": result_matrix,
+    }
+
+    return results
