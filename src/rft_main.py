@@ -28,6 +28,7 @@ def import_mesh(model: str):
 
         vertices = trg.vectors.reshape(-1, 3)
         vertices, indices = np.unique(vertices, axis=0, return_inverse=True)
+        vertices[:, 2] -= min(vertices[:, 2])
         faces = indices.reshape(-1, 3)
 
         return (
@@ -438,20 +439,24 @@ def run_rft(
     step = 0
 
     for depth in range(start_depth, end_depth + step_size, step_size):
-        min_z = np.min(point_list[:, 2])
-        offset = min_z - 0
-        point_list[:, 2] -= offset
-        point_list[:, 2] -= depth
-        depth_list = point_list[:, 2][:, np.newaxis]
-        vertices[:, 2] -= offset
-        vertices[:, 2] -= depth
+        current_point_list = point_list.copy()
+        current_point_list[:, 2] -= depth
+        current_depth_list = current_point_list[:, 2][:, np.newaxis]
+
+        # min_z = np.min(point_list[:, 2])
+        # offset = min_z - 0
+        # point_list[:, 2] -= offset
+        # point_list[:, 2] -= depth
+        # depth_list = point_list[:, 2][:, np.newaxis]
+        # vertices[:, 2] -= offset
+        # vertices[:, 2] -= depth
         # point_list[:, 2] -= step_size
         # depth_list = point_list[:, 2][:, np.newaxis]
         # vertices[:, 2] -= step_size
 
         ## Calculate movement
         movement = calc_movement(
-            point_list,
+            current_point_list,
             depth,
             object_height,
             direction_angle_xz_deg,
@@ -463,12 +468,14 @@ def run_rft(
 
         ## Check conditions
         (
-            point_list,
+            current_point_list,
             normal_list,
             area_list,
-            depth_list,
+            current_depth_list,
             movement,
-        ) = check_conditions(point_list, normal_list, area_list, depth_list, movement)
+        ) = check_conditions(
+            current_point_list, normal_list, area_list, current_depth_list, movement
+        )
 
         ## Find local coordinate frame for each subsurface
         z_local, r_local, theta_local = find_local_frame(normal_list, movement)
@@ -500,7 +507,7 @@ def run_rft(
 
         ## Find the resultant forces on object
         forces, pressures, force_x, force_y, force_z, resultant = find_forces(
-            alpha, depth_list, area_list
+            alpha, current_depth_list, area_list
         )
 
         ## Find the resultant torques on object
@@ -510,7 +517,7 @@ def run_rft(
             torque_y,
             torque_z,
             resultant_torque,
-        ) = find_torques(point_list, forces)
+        ) = find_torques(current_point_list, forces)
 
         result_matrix[step, :] = [
             depth,
@@ -526,10 +533,10 @@ def run_rft(
         step += 1
 
     results = {
-        "point_list": point_list,
+        "point_list": current_point_list,
         "normal_list": normal_list,
         "area_list": area_list,
-        "depth_list": depth_list,
+        "depth_list": current_depth_list,
         "object_width_x": object_width_x,
         "object_width_y": object_width_y,
         "object_height": object_height,
