@@ -535,7 +535,7 @@ def run_rft(
 
         step += 1
 
-    print("Processed movement from, ", start_depth, " to ", end_depth, " mm")
+    print("Processed movement from", start_depth, "to", end_depth, "mm")
 
     results = {
         "point_list": current_point_list,
