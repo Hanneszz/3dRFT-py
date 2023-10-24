@@ -438,9 +438,14 @@ def run_rft(
     step = 0
 
     for depth in range(start_depth, end_depth + step_size, step_size):
-        point_list[:, 2] -= step_size
+        min_z = np.min(point_list[:, 2])
+        offset = depth - min_z
+        point_list[:, 2] += offset
         depth_list = point_list[:, 2][:, np.newaxis]
-        vertices[:, 2] -= step_size
+        vertices[:, 2] += offset
+        # point_list[:, 2] -= step_size
+        # depth_list = point_list[:, 2][:, np.newaxis]
+        # vertices[:, 2] -= step_size
 
         ## Calculate movement
         movement = calc_movement(
