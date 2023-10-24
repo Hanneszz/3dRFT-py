@@ -439,10 +439,12 @@ def run_rft(
 
     for depth in range(start_depth, end_depth + step_size, step_size):
         min_z = np.min(point_list[:, 2])
-        offset = depth - min_z
-        point_list[:, 2] += offset
+        offset = min_z - 0
+        point_list[:, 2] -= offset
+        point_list[:, 2] -= depth
         depth_list = point_list[:, 2][:, np.newaxis]
-        vertices[:, 2] += offset
+        vertices[:, 2] -= offset
+        vertices[:, 2] -= depth
         # point_list[:, 2] -= step_size
         # depth_list = point_list[:, 2][:, np.newaxis]
         # vertices[:, 2] -= step_size
