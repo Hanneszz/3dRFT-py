@@ -440,6 +440,8 @@ def run_rft(
         current_point_list = np.copy(point_list)
         current_point_list[:, 2] -= depth
         current_depth_list = current_point_list[:, 2][:, np.newaxis]
+        current_normal_list = np.copy(normal_list)
+        current_area_list = np.copy(area_list)
 
         # min_z = np.min(point_list[:, 2])
         # offset = min_z - 0
@@ -467,20 +469,24 @@ def run_rft(
         ## Check conditions
         (
             current_point_list,
-            normal_list,
-            area_list,
+            current_normal_list,
+            current_area_list,
             current_depth_list,
             movement,
         ) = check_conditions(
-            current_point_list, normal_list, area_list, current_depth_list, movement
+            current_point_list,
+            current_normal_list,
+            current_area_list,
+            current_depth_list,
+            movement,
         )
 
         ## Find local coordinate frame for each subsurface
-        z_local, r_local, theta_local = find_local_frame(normal_list, movement)
+        z_local, r_local, theta_local = find_local_frame(current_normal_list, movement)
 
         ## Find the characteristic angles of the RFT method
         beta, gamma, psi = find_angles(
-            normal_list, movement, z_local, r_local, theta_local
+            current_normal_list, movement, z_local, r_local, theta_local
         )
 
         ## Find empirical values for the RFT method
@@ -488,7 +494,7 @@ def run_rft(
 
         ## Find dimensionless response vectors alpha
         alpha_generic, alpha_generic_n, alpha_generic_t, alpha = find_alpha(
-            normal_list,
+            current_normal_list,
             movement,
             beta,
             gamma,
@@ -505,7 +511,7 @@ def run_rft(
 
         ## Find the resultant forces on object
         forces, pressures, force_x, force_y, force_z, resultant = find_forces(
-            alpha, current_depth_list, area_list
+            alpha, current_depth_list, current_area_list
         )
 
         ## Find the resultant torques on object
@@ -532,8 +538,8 @@ def run_rft(
 
     results = {
         "point_list": current_point_list,
-        "normal_list": normal_list,
-        "area_list": area_list,
+        "normal_list": current_normal_list,
+        "area_list": current_area_list,
         "depth_list": current_depth_list,
         "object_width_x": object_width_x,
         "object_width_y": object_width_y,
