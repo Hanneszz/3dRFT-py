@@ -438,8 +438,8 @@ def run_rft(
     step = 0
 
     for depth in range(start_depth, end_depth + step_size, step_size):
-        point_list[:, 2] -= depth
-        vertices[:, 2] -= depth
+        point_list[:, 2] -= step_size
+        vertices[:, 2] -= step_size
 
         ## Calculate movement
         movement = calc_movement(
