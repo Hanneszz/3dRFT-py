@@ -442,78 +442,80 @@ def run_rft(
         vertices[:, 2] -= depth
 
         ## Calculate movement
-    movement = calc_movement(
-        point_list,
-        depth,
-        object_height,
-        direction_angle_xz_deg,
-        direction_angle_y_deg,
-        linear_velocity,
-        rotation,
-        angular_velocity,
-    )
+        movement = calc_movement(
+            point_list,
+            depth,
+            object_height,
+            direction_angle_xz_deg,
+            direction_angle_y_deg,
+            linear_velocity,
+            rotation,
+            angular_velocity,
+        )
 
-    ## Check conditions
-    (
-        point_list,
-        normal_list,
-        area_list,
-        depth_list,
-        movement,
-    ) = check_conditions(point_list, normal_list, area_list, depth_list, movement)
+        ## Check conditions
+        (
+            point_list,
+            normal_list,
+            area_list,
+            depth_list,
+            movement,
+        ) = check_conditions(point_list, normal_list, area_list, depth_list, movement)
 
-    ## Find local coordinate frame for each subsurface
-    z_local, r_local, theta_local = find_local_frame(normal_list, movement)
+        ## Find local coordinate frame for each subsurface
+        z_local, r_local, theta_local = find_local_frame(normal_list, movement)
 
-    ## Find the characteristic angles of the RFT method
-    beta, gamma, psi = find_angles(normal_list, movement, z_local, r_local, theta_local)
+        ## Find the characteristic angles of the RFT method
+        beta, gamma, psi = find_angles(
+            normal_list, movement, z_local, r_local, theta_local
+        )
 
-    ## Find empirical values for the RFT method
-    f_1, f_2, f_3 = find_fit(beta, gamma, psi)
+        ## Find empirical values for the RFT method
+        f_1, f_2, f_3 = find_fit(beta, gamma, psi)
 
-    ## Find dimensionless response vectors alpha
-    alpha_generic, alpha_generic_n, alpha_generic_t, alpha = find_alpha(
-        normal_list,
-        movement,
-        beta,
-        gamma,
-        psi,
-        z_local,
-        r_local,
-        theta_local,
-        f_1,
-        f_2,
-        f_3,
-        material_constant,
-        firction_surface,
-    )
+        ## Find dimensionless response vectors alpha
+        alpha_generic, alpha_generic_n, alpha_generic_t, alpha = find_alpha(
+            normal_list,
+            movement,
+            beta,
+            gamma,
+            psi,
+            z_local,
+            r_local,
+            theta_local,
+            f_1,
+            f_2,
+            f_3,
+            material_constant,
+            firction_surface,
+        )
 
-    ## Find the resultant forces on object
-    forces, pressures, force_x, force_y, force_z, resultant = find_forces(
-        alpha, depth_list, area_list
-    )
+        ## Find the resultant forces on object
+        forces, pressures, force_x, force_y, force_z, resultant = find_forces(
+            alpha, depth_list, area_list
+        )
 
-    ## Find the resultant torques on object
-    (
-        torques,
-        torque_x,
-        torque_y,
-        torque_z,
-        resultant_torque,
-    ) = find_torques(point_list, forces)
+        ## Find the resultant torques on object
+        (
+            torques,
+            torque_x,
+            torque_y,
+            torque_z,
+            resultant_torque,
+        ) = find_torques(point_list, forces)
 
-    result_matrix[step, :] = [
-        depth,
-        force_x,
-        force_y,
-        force_z,
-        torque_x,
-        torque_y,
-        torque_z,
-    ]
+        result_matrix[step, :] = [
+            depth,
+            force_x,
+            force_y,
+            force_z,
+            torque_x,
+            torque_y,
+            torque_z,
+        ]
 
-    print("Processed movement at depth:", depth, "mm")
-    step += 1
+        print("Processed movement at depth:", depth, "mm")
+        step += 1
 
     results = {
         "point_list": point_list,
