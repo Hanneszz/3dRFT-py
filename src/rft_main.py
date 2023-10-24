@@ -1,4 +1,5 @@
-"""This module runs the 3D-RFT code based on the framework proposed by Agarwal et al. --> https://doi.org/10.1073/pnas.2214017120"""
+"""This module runs the 3D-RFT code based on the framework proposed by Agarwal et al.
+--> https://doi.org/10.1073/pnas.2214017120"""
 
 
 import math
@@ -24,7 +25,6 @@ def import_mesh(model: str):
         area_list = trg.areas
 
         point_list[:, 2] -= min(point_list[:, 2])
-        depth_list = point_list[:, 2][:, np.newaxis]
 
         vertices = trg.vectors.reshape(-1, 3)
         vertices, indices = np.unique(vertices, axis=0, return_inverse=True)
@@ -35,7 +35,6 @@ def import_mesh(model: str):
             point_list,
             normal_list,
             area_list,
-            depth_list,
             object_width_x,
             object_width_y,
             object_height,
@@ -79,7 +78,7 @@ def calc_movement(
 
     if rotation:
         radii_list = points.copy()
-        radii_list[:, 2] += (depth * 1000) - (object_height / 2)
+        radii_list[:, 2] += (depth) - (object_height / 2)
         angular_movement = np.cross(elements * angular_velocity, radii_list)
         movement += angular_movement.round(12)
 
@@ -426,7 +425,6 @@ def run_rft(
         point_list,
         normal_list,
         area_list,
-        depth_list,
         object_width_x,
         object_width_y,
         object_height,
@@ -439,7 +437,7 @@ def run_rft(
     step = 0
 
     for depth in range(start_depth, end_depth + step_size, step_size):
-        current_point_list = point_list.copy()
+        current_point_list = np.copy(point_list)
         current_point_list[:, 2] -= depth
         current_depth_list = current_point_list[:, 2][:, np.newaxis]
 
