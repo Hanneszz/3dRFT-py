@@ -63,16 +63,16 @@ def calc_movement(
     linear_direction_vector = np.array(
         [
             [
-                round(math.cos(math.radians(dir_angle_xz_deg)), 12),
-                round(math.cos(math.radians(dir_angle_y_deg)), 12),
-                round(math.sin(math.radians(dir_angle_xz_deg)), 12),
+                math.cos(math.radians(dir_angle_xz_deg)),
+                math.cos(math.radians(dir_angle_y_deg)),
+                math.sin(math.radians(dir_angle_xz_deg)),
             ]
         ]
     )
 
     n_elements = points.shape[0]
     elements = np.ones((n_elements, 3))
-    movement = elements * (linear_velocity * linear_direction_vector * 1000)
+    movement = elements * (linear_velocity * linear_direction_vector * 1000).round(12)
 
     if rotation:
         radii_list = points.copy()
@@ -80,14 +80,14 @@ def calc_movement(
         angular_movement = np.cross(elements * angular_velocity, radii_list)
         movement += angular_movement.round(12)
 
-    movement = movement / np.linalg.norm(movement, axis=1, keepdims=True)
+    movement = movement / np.linalg.norm(movement, axis=1, keepdims=True).round(12)
 
     return movement
 
 
 def check_conditions(point_list, normal_list, area_list, depth_list, movement):
     """This checks certain conditions for subsurfaces to be considered in the RFT method"""
-    is_leading_edge = np.sum(normal_list * movement, axis=1) >= 0
+    is_leading_edge = np.sum(normal_list * movement, axis=1) >= -0.0e-12
     is_intruding = point_list[:, 2] < 0
     include = is_intruding & is_leading_edge
 
@@ -108,13 +108,11 @@ def find_local_frame(normal_list, movement):
 
     dot_product_movement = np.einsum("ij,ij->i", movement, z_local)[:, np.newaxis]
     difference_movement = movement - dot_product_movement * z_local
-    norms_movement = np.linalg.norm(difference_movement, axis=1, keepdims=True).round(
-        12
-    )
+    norms_movement = np.linalg.norm(difference_movement, axis=1, keepdims=True)
 
     dot_product_normal = np.einsum("ij,ij->i", normal_list, z_local)[:, np.newaxis]
     difference_normal = normal_list - dot_product_normal * z_local
-    norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True).round(12)
+    norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True)
 
     r_local_1 = np.where((norms_movement == 0) & (norms_normal == 0), [1, 0, 0], 0)
     r_local_2 = np.where(
