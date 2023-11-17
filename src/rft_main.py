@@ -19,9 +19,7 @@ def import_mesh(model: str):
 
         point_list = trg.centroids
         normal_list = trg.normals
-        normal_list = (
-            normal_list / np.linalg.norm(normal_list, axis=1, keepdims=True)
-        ).round(12)
+        normal_list = normal_list / np.linalg.norm(normal_list, axis=1, keepdims=True)
         area_list = trg.areas
 
         point_list[:, 2] -= min(point_list[:, 2])
