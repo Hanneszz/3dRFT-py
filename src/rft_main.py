@@ -72,7 +72,7 @@ def calc_movement(
 
     n_elements = points.shape[0]
     elements = np.ones((n_elements, 3))
-    movement = elements * (linear_velocity * linear_direction_vector * 1000).round(12)
+    movement = elements * (linear_velocity * linear_direction_vector * 1000)
 
     if rotation:
         radii_list = points.copy()
@@ -80,7 +80,7 @@ def calc_movement(
         angular_movement = np.cross(elements * angular_velocity, radii_list)
         movement += angular_movement.round(12)
 
-    movement = (movement / np.linalg.norm(movement, axis=1, keepdims=True)).round(12)
+    movement = movement / np.linalg.norm(movement, axis=1, keepdims=True)
 
     return movement
 
