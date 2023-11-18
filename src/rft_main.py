@@ -87,7 +87,7 @@ def calc_movement(
 
 def check_conditions(point_list, normal_list, area_list, depth_list, movement):
     """This checks certain conditions for subsurfaces to be considered in the RFT method"""
-    is_leading_edge = np.sum(normal_list * movement, axis=1) >= -0.0e-12
+    is_leading_edge = np.einsum("ij,ij->i", normal_list, movement) >= -0.00000000000001
     is_intruding = point_list[:, 2] < 0
     include = is_intruding & is_leading_edge
 
@@ -104,8 +104,6 @@ def find_local_frame(normal_list, movement):
     """This determines the local coordinate frame for each subsurface of the object"""
     z_local = np.repeat([[0, 0, 1]], normal_list.shape[0], axis=0)
 
-    r_local = np.zeros_like(z_local)
-
     dot_product_movement = np.einsum("ij,ij->i", movement, z_local)[:, np.newaxis]
     difference_movement = movement - dot_product_movement * z_local
     norms_movement = np.linalg.norm(difference_movement, axis=1, keepdims=True)
@@ -114,21 +112,26 @@ def find_local_frame(normal_list, movement):
     difference_normal = normal_list - dot_product_normal * z_local
     norms_normal = np.linalg.norm(difference_normal, axis=1, keepdims=True)
 
-    r_local_1 = np.where((norms_movement == 0) & (norms_normal == 0), [1, 0, 0], 0)
-    r_local_2 = np.where(
-        (norms_movement == 0) & ~(norms_normal == 0),
-        difference_normal / norms_normal,
-        0,
-    )
-    r_local_3 = np.where(
-        ~((norms_movement == 0) | (norms_normal == 0)),
-        difference_movement / norms_movement,
-        0,
-    )
+    r_local = np.zeros_like(z_local)
 
-    r_local = r_local_1 + r_local_2 + r_local_3
+    # Initialize r_local
+    r_local = np.zeros_like(difference_movement)
 
-    r_local = np.sum([r_local_1, r_local_2, r_local_3], axis=0)
+    # Case 1: norms_movement and norms_normal are both zero
+    mask_1 = (norms_movement == 0) & (norms_normal == 0)
+    r_local[mask_1] = [1, 0, 0]
+    print(r_local[1666])
+
+    # Case 2: norms_movement is zero and norms_normal is not
+    mask_2 = (norms_movement == 0) & ~(norms_normal == 0)
+    r_local[mask_2] = (difference_normal / norms_normal)[mask_2]
+    print(r_local[1666])
+
+    # Case 3: norms_movement is not zero
+    # This case implicitly includes scenarios where norms_normal can be either zero or not
+    mask_3 = norms_movement != 0
+    r_local[mask_3] = (difference_movement / norms_movement)[mask_3]
+    print(r_local[1666])
 
     theta_local = np.cross(z_local, r_local, axis=1)
 
