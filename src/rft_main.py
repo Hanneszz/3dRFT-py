@@ -119,19 +119,16 @@ def find_local_frame(normal_list, movement):
 
     # Case 1: norms_movement and norms_normal are both zero
     mask_1 = (norms_movement == 0) & (norms_normal == 0)
-    r_local[mask_1] = [1, 0, 0]
-    print(r_local[1666])
+    r_local[mask_1.ravel()] = [1, 0, 0]
 
     # Case 2: norms_movement is zero and norms_normal is not
     mask_2 = (norms_movement == 0) & ~(norms_normal == 0)
-    r_local[mask_2] = (difference_normal / norms_normal)[mask_2]
-    print(r_local[1666])
+    r_local[mask_2.ravel()] = (difference_normal / norms_normal)[mask_2.ravel()]
 
     # Case 3: norms_movement is not zero
     # This case implicitly includes scenarios where norms_normal can be either zero or not
     mask_3 = norms_movement != 0
-    r_local[mask_3] = (difference_movement / norms_movement)[mask_3]
-    print(r_local[1666])
+    r_local[mask_3.ravel()] = (difference_movement / norms_movement)[mask_3.ravel()]
 
     theta_local = np.cross(z_local, r_local, axis=1)
 
