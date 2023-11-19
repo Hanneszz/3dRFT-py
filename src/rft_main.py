@@ -412,8 +412,6 @@ def run_rft(
         )
     ) * 10**-9
 
-    angular_velocity = np.array([0, 0, -2 * np.pi])
-
     num_steps = int((end_depth + step_size - start_depth) / step_size)
 
     ## STL Processing
