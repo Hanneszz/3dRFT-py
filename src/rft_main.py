@@ -381,7 +381,7 @@ def run_rft(
     model,
     bulk_density,
     friction_material,
-    firction_surface,
+    friction_surface,
     friction_type,
     gravity,
     linear_velocity,
@@ -396,7 +396,7 @@ def run_rft(
     """This is the Python implementation of the 3D-RFT Code based on the framework"""
     if friction_type == "angle":
         friction_material = np.tan(np.deg2rad(friction_material))
-        firction_surface = np.tan(np.deg2rad(firction_surface))
+        friction_surface = np.tan(np.deg2rad(friction_surface))
     elif friction_type == "coefficient":
         pass
     else:
@@ -500,7 +500,7 @@ def run_rft(
             f_2,
             f_3,
             material_constant,
-            firction_surface,
+            friction_surface,
         )
 
         ## Find the resultant forces on object
