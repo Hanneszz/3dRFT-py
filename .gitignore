@@ -1,8 +1,8 @@
 .vscode
-.gitattributes
 venv
 .DS_Store
 .venv
 __pycache__
 __init__.py
 plots
+results
