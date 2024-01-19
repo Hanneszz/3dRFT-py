@@ -428,6 +428,7 @@ def run_rft(
     ) = import_mesh(model)
 
     result_matrix = np.zeros((num_steps, 7))
+    results_detailed = np.zeros((point_list.shape[0], 6, num_steps))
     step = 0
 
     for depth in range(start_depth, end_depth + step_size, step_size):
@@ -527,6 +528,13 @@ def run_rft(
             torque_z,
         ]
 
+        detailed_result = np.concatenate((current_point_list, forces), axis=1)
+        if step == 0:
+            results_detailed = np.zeros(
+                (detailed_result.shape[0], detailed_result.shape[1], num_steps)
+            )
+        results_detailed[:, :, step] = detailed_result
+
         step += 1
 
     print("Processed movement from", start_depth, "to", end_depth, "mm")
@@ -563,6 +571,7 @@ def run_rft(
         "torque_z": torque_z,
         "resultant_torque": resultant_torque,
         "result_matrix": result_matrix,
+        "results_detailed": results_detailed,
     }
 
     return results
