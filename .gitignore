@@ -6,3 +6,5 @@ __pycache__
 __init__.py
 plots
 results
+*.stl
+!/*cylinder*.stl
