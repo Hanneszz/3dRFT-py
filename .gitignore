@@ -9,6 +9,6 @@ plots/*
 results/*
 models/*
 # exception to the rule
-!plots/.gitkeep
-!results/.gitkeep
-!models/.gitkeep
+!plots/scatterxyz_Cylinder_1310_0.21_0.4_-90_-90_rotating_-3.14rad_0_125.svg
+!results/results_Cylinder_1310_0.21_0.4_-90_-90_rotating_-3.14rad_0_125.csv
+!models/Cylinder.stl
