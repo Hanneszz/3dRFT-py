@@ -4,6 +4,11 @@ venv
 .venv
 __pycache__
 __init__.py
-plots
-results
-models
+# exclude everything
+plots/*
+results/*
+models/*
+# exception to the rule
+!plots/.gitkeep
+!results/.gitkeep
+!models/.gitkeep
