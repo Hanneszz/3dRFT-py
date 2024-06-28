@@ -1,7 +1,6 @@
 """This module runs the 3D-RFT code based on the framework proposed by Agarwal et al.
 --> https://doi.org/10.1073/pnas.2214017120"""
 
-
 import math
 
 import numpy as np
